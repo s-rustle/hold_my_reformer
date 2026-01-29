@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hold My Reformer
 
-## Getting Started
+A Pilates class reservation system: members book sessions with credits; you (admin) manage the calendar and add private blocks or group classes.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Member login** – Students sign in and see the calendar.
+- **Credits** – Members spend credits to reserve private sessions or join group classes.
+- **Calendar** – View and book sessions; calendar updates when you add events or members book.
+- **Admin** – Add **blocks** (1:1 private sessions) or **classes** (group sessions with max participants). Click a time slot on the calendar to create an event.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Environment**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   Copy `.env.example` to `.env` and set:
 
-## Learn More
+   - `DATABASE_URL` – SQLite default: `file:./prisma/dev.db`
+   - `AUTH_SECRET` – required for NextAuth (e.g. `openssl rand -base64 32`)
 
-To learn more about Next.js, take a look at the following resources:
+2. **Database**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   npx prisma migrate dev   # create DB and run migrations
+   npm run db:seed          # create admin + sample member
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Run**
 
-## Deploy on Vercel
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Seed accounts
+
+After `npm run db:seed`:
+
+| Role   | Email                     | Password  |
+|--------|----------------------------|-----------|
+| Admin  | sarah.russell@lumenalta.com | admin123  |
+| Member | member@example.com          | member123 |
+
+Member starts with 10 credits. Add events as admin, then sign in as member to book.
+
+## Tech
+
+- Next.js 16, React 19, TypeScript
+- Prisma 7 + SQLite (adapter: better-sqlite3)
+- NextAuth v5 (credentials, JWT, member/admin roles)
+- react-big-calendar, date-fns, Tailwind CSS

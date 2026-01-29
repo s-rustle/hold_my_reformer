@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  role         Role      @default(MEMBER)
+  credits      Int       @default(0) // members only; admin ignores
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
+  createdEvents Event[]  @relation("EventCreator")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+model Event {
+  id               String    @id @default(cuid())
+  title            String
+  type             EventType
+  start            DateTime
+  end              DateTime
+  maxParticipants  Int       @default(1) // 1 = private block; >1 = class
+  creditsRequired  Int       @default(1) // credits per booking
+  createdById      String
+  createdBy        User      @relation("EventCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  bookings         Booking[]
+}
+
+enum EventType {
+  BLOCK  // private session slot (1:1)
+  CLASS  // group class
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  creditsUsed Int
+  status      BookingStatus @default(CONFIRMED)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, eventId])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}

@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
+/* HoldMyReformer — forest mood: deep greens, organic warmth, no black/white */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Forest greens (canyon, canopy, tea fields) */
+  --hmr-forest: #142814;
+  --hmr-forest-mid: #1e3323;
+  --hmr-forest-light: #243d24;
+  --hmr-leaf: #2d5a2d;
+  --hmr-leaf-bright: #4a7c4a;
+  --hmr-leaf-pale: #6b9e6b;
+  --hmr-bamboo: #8fbc8f;
+  /* Page & cards */
+  --hmr-bg: #1a2e1a;
+  --hmr-bg-text: #e2ebe2;
+  --hmr-card-bg: #f6faf6;
+  --hmr-card-border: #c5d9c5;
+  --hmr-border: #2d4a2d;
+  --hmr-border-light: #a8c4a8;
+  /* Text (dark green, not black) */
+  --hmr-text: #0d1f0d;
+  --hmr-text-muted: #3d5c3d;
+  /* Accent — warm redwood kept for contrast */
+  --hmr-redwood: #a8432e;
+  --hmr-redwood-light: #c45c3e;
+  --hmr-sequoia: #8b3a2e;
+  /* Legacy aliases */
+  --hmr-black: var(--hmr-forest);
+  --hmr-deep: var(--hmr-text);
+  --hmr-primary: var(--hmr-leaf);
+  --hmr-accent: var(--hmr-leaf-bright);
+  --hmr-light: #e8f0e8;
+  --hmr-neutral: #5a7a5a;
+  /* Shadows with green undertone */
+  --hmr-shadow: 0 1px 3px rgba(20, 40, 20, 0.08);
+  --hmr-shadow-md: 0 4px 12px rgba(20, 40, 20, 0.12);
+  --hmr-radius: 0.5rem;
+  --hmr-radius-sm: 0.375rem;
+  --hmr-radius-lg: 0.75rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-hmr-black: var(--hmr-black);
+  --color-hmr-redwood: var(--hmr-redwood);
+  --color-hmr-sequoia: var(--hmr-sequoia);
+  --color-hmr-bg: var(--hmr-bg);
+  --color-hmr-bg-text: var(--hmr-bg-text);
+  --font-display: var(--font-oswald);
+  --font-body: var(--font-work-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--hmr-bg);
+  color: var(--hmr-bg-text);
+  font-family: var(--font-work-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Cards — soft green tint, dark green text */
+.hmr-card {
+  background: var(--hmr-card-bg);
+  color: var(--hmr-text);
+  border-radius: var(--hmr-radius);
+  border: 1px solid var(--hmr-card-border);
+  box-shadow: var(--hmr-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.hmr-card:hover {
+  border-color: var(--hmr-border-light);
+  box-shadow: var(--hmr-shadow-md);
+}
+
+/* Buttons — leaf green primary, forest outline secondary */
+.hmr-btn-primary {
+  background: var(--hmr-leaf);
+  color: white;
+  border: 2px solid var(--hmr-leaf);
+  border-radius: var(--hmr-radius-sm);
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.hmr-btn-primary:hover {
+  background: var(--hmr-leaf-bright);
+  border-color: var(--hmr-leaf-bright);
+}
+
+.hmr-btn-secondary {
+  background: transparent;
+  color: var(--hmr-bg-text);
+  border: 2px solid var(--hmr-border-light);
+  border-radius: var(--hmr-radius-sm);
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.hmr-btn-secondary:hover {
+  background: var(--hmr-forest-light);
+  color: var(--hmr-bamboo);
+  border-color: var(--hmr-leaf-pale);
+}
+
+/* Typography — rugged display, clean body */
+.hmr-display {
+  font-family: var(--font-oswald), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* No separate accent font — body only for non-display text */
+
+/* Animations */
+@keyframes hmr-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hmr-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.92; }
+}
+
+.hmr-animate-in {
+  animation: hmr-fade-in 0.4s ease-out forwards;
+}
+
+.hmr-pulse {
+  animation: hmr-pulse-soft 2s ease-in-out infinite;
+}
+
+.hmr-stagger > * {
+  animation: hmr-fade-in 0.45s ease-out forwards;
+}
+.hmr-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.hmr-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.hmr-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.hmr-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.hmr-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.hmr-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+.leaflet-container {
+  font-family: var(--font-work-sans), system-ui, sans-serif;
 }
