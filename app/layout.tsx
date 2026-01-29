@@ -4,6 +4,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { NavBar } from "@/components/nav-bar";
 import { Footer } from "@/components/footer";
+import { Providers } from "./providers";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -34,9 +35,11 @@ export default function RootLayout({
       className={`${oswald.variable} ${workSans.variable}`}
     >
       <body className="min-h-screen flex flex-col antialiased">
-        <NavBar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <NavBar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
