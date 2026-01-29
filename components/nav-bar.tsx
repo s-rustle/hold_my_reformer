@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 const navLinks = [
   { href: "/", label: "Calendar" },
@@ -14,6 +15,8 @@ const navLinks = [
 export function NavBar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated" && !!session?.user;
 
   return (
     <header className="sticky top-0 z-50 border-b-2 border-[var(--hmr-leaf-pale)] bg-[var(--hmr-forest)]">
@@ -40,6 +43,32 @@ export function NavBar() {
               </Link>
             </li>
           ))}
+          <li>
+            {isLoggedIn ? (
+              <span className="flex items-center gap-2">
+                <Link
+                  href="/dashboard"
+                  className="rounded px-3 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)] transition"
+                >
+                  My account
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="rounded px-3 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)] transition"
+                >
+                  Sign out
+                </button>
+              </span>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded px-3 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)] transition"
+              >
+                Sign in
+              </Link>
+            )}
+          </li>
         </ul>
 
         <button
@@ -72,6 +101,34 @@ export function NavBar() {
                 </Link>
               </li>
             ))}
+            <li className="border-t border-[var(--hmr-forest-light)] pt-2 mt-2">
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="block rounded px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)]"
+                  >
+                    My account
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { setOpen(false); signOut({ callbackUrl: "/" }); }}
+                    className="block w-full text-left rounded px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)]"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block rounded px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-[var(--hmr-bg-text)] hover:bg-[var(--hmr-forest-light)] hover:text-[var(--hmr-bamboo)]"
+                >
+                  Sign in
+                </Link>
+              )}
+            </li>
           </ul>
         </div>
       )}

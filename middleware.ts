@@ -3,10 +3,18 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+  if (!secret) {
+    console.warn(
+      "Auth: Set NEXTAUTH_SECRET or AUTH_SECRET in .env (e.g. run: openssl rand -base64 32) so sign-in works."
+    );
+  }
+  const token = secret
+    ? await getToken({
+        req,
+        secret,
+      })
+    : null;
   const isLoggedIn = !!token;
   const path = req.nextUrl.pathname;
 
