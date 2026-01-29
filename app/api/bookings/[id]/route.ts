@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+type TransactionClient = Omit<
+  typeof prisma,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
 
 export async function DELETE(
   _req: NextRequest,
@@ -27,7 +31,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Already cancelled" }, { status: 400 });
   }
 
-  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  await prisma.$transaction(async (tx: TransactionClient) => {
     await tx.booking.update({
       where: { id },
       data: { status: "CANCELLED" },
