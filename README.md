@@ -16,7 +16,7 @@ A Pilates class reservation system: members book sessions with credits; you (adm
    Copy `.env.example` to `.env` and set:
 
    - `DATABASE_URL` – SQLite default: `file:./prisma/dev.db`
-   - `AUTH_SECRET` – required for NextAuth (e.g. `openssl rand -base64 32`)
+   - `NEXTAUTH_SECRET` – required for NextAuth and auth middleware (e.g. `openssl rand -base64 32`)
 
 2. **Database**
 

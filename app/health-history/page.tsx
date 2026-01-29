@@ -283,7 +283,9 @@ function CheckboxGroup({
 }
 
 export default function HealthHistoryPage() {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data ?? null;
+  const status = sessionResult?.status ?? "loading";
   const [completed, setCompleted] = useState<boolean | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);

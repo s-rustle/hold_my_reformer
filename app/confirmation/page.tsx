@@ -20,12 +20,16 @@ export default function ConfirmationPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_RESERVATION);
-      if (raw) setReservation(JSON.parse(raw));
-    } catch {
-      setReservation(null);
-    }
+    const read = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_RESERVATION);
+        if (raw) setReservation(JSON.parse(raw));
+        else setReservation(null);
+      } catch {
+        setReservation(null);
+      }
+    };
+    queueMicrotask(read);
   }, []);
 
   if (!reservation) {

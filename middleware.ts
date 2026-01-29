@@ -1,24 +1,31 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
+export async function middleware(req: NextRequest) {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  const isLoggedIn = !!token;
   const path = req.nextUrl.pathname;
+
   if (path.startsWith("/member") || path.startsWith("/admin") || path.startsWith("/dashboard")) {
     if (!isLoggedIn) {
       const login = new URL("/login", req.nextUrl.origin);
       login.searchParams.set("callbackUrl", path);
-      return Response.redirect(login);
+      return NextResponse.redirect(login);
     }
-    if (path.startsWith("/member") && req.auth?.user?.role !== "MEMBER") {
-      return Response.redirect(new URL("/dashboard", req.nextUrl.origin));
+    const role = token?.role as string | undefined;
+    if (path.startsWith("/member") && role !== "MEMBER") {
+      return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
     }
-    if (path.startsWith("/admin") && req.auth?.user?.role !== "ADMIN") {
-      return Response.redirect(new URL("/dashboard", req.nextUrl.origin));
+    if (path.startsWith("/admin") && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
     }
   }
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/member/:path*", "/admin/:path*", "/dashboard"],

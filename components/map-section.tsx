@@ -8,10 +8,22 @@ const DEFAULT_CENTER: [number, number] = [37.7749, -122.4194];
 function MapInner() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
-  if (!mounted || typeof window === "undefined") {
+  const [mapModules, setMapModules] = useState<{
+    L: typeof import("leaflet");
+    RL: typeof import("react-leaflet");
+  } | null>(null);
+
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return;
+    Promise.all([import("leaflet"), import("react-leaflet")]).then(
+      ([L, RL]) => setMapModules({ L: L.default, RL })
+    );
+  }, [mounted]);
+
+  if (!mounted || !mapModules) {
     return (
       <div className="flex h-full min-h-[160px] items-center justify-center bg-[var(--hmr-forest-mid)] text-sm font-medium text-[var(--hmr-bg-text)]">
         Loading map…
@@ -19,8 +31,8 @@ function MapInner() {
     );
   }
 
-  const L = require("leaflet");
-  const { MapContainer, TileLayer, Marker, Popup } = require("react-leaflet");
+  const { L, RL } = mapModules;
+  const { MapContainer, TileLayer, Marker, Popup } = RL;
   /* Leaflet CSS is imported in globals.css to avoid HMR module factory errors */
 
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
