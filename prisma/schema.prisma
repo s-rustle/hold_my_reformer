@@ -7,16 +7,26 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
-  passwordHash String
-  role         Role      @default(MEMBER)
-  credits      Int       @default(0) // members only; admin ignores
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  bookings     Booking[]
-  createdEvents Event[]  @relation("EventCreator")
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  passwordHash  String
+  role          Role           @default(MEMBER)
+  credits       Int            @default(0) // members only; admin ignores
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  bookings      Booking[]
+  createdEvents Event[]        @relation("EventCreator")
+  healthHistory HealthHistory?
+}
+
+model HealthHistory {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formData  String   // JSON of the health history form
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

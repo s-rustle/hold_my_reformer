@@ -145,3 +145,430 @@ There’s a Next.js warning about multiple lockfiles (one in `hold_my_reformer` 
 
 ---
 
+_**User**_
+
+as admin, how do i view the health history forms once submitted?
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+<think><details><summary>Thought Process</summary>
+
+The user is asking about how an admin can view health history forms once they've been submitted. I need to explore the codebase to understand:
+
+1. How health history forms are structured and stored
+2. What the admin dashboard currently shows
+3. Whether there's already a way for admins to view health history, or if I need to add it
+
+I will search for health history related code and admin functionality.
+</details></think>
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/health-history/page.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/admin/admin-dashboard.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/prisma/schema.prisma</summary>
+
+</details>
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+
+I see the situation now:
+
+1. **Health history form** (`app/health-history/page.tsx`): The form data is currently saved only to **localStorage** (`hmr_health_history_data` and `hmr_health_history_completed`). There is no API or database storing health history—it's client-side only.
+
+2. **Admin dashboard** (`app/admin/admin-dashboard.tsx`): Shows events/calendar management only. There is no health history section.
+
+3. **Prisma schema**: There is no `HealthHistory` (or similar) model. We have User, Event, Booking.
+
+So right now:
+- **There is no way for an admin to view health history forms** because the data is never sent to the server—it's stored only in the user's browser localStorage.
+
+To allow admins to view health history forms once submitted, we need to:
+
+1. **Add a HealthHistory model** (or similar) in Prisma and link it to User.
+2. **Create an API** to submit health history (POST) and to list/get health history (GET, admin-only).
+3. **Update the health-history page** to POST the form data to the API on submit (in addition to or instead of localStorage).
+4. **Add an admin UI** to list and view submitted health history forms (e.g. a new page `/admin/health-history` or a section in the admin dashboard).
+
+I'll implement this for the user.
+</details></think>
+
+---
+
+
+Checking for an API that stores health history and how the admin area is structured:
+
+
+---
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "pattern": "health|HealthHistory|hmr_health",
+  "path": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer",
+  "glob": "*.{ts,tsx,prisma}",
+  "caseInsensitive": false
+}
+```
+Result:
+
+```json
+{
+  "success": {
+    "pattern": "health|HealthHistory|hmr_health",
+    "path": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer",
+    "outputMode": "content",
+    "workspaceResults": {
+      "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer": {
+        "content": {
+          "matches": [
+            {
+              "file": "./components/footer.tsx",
+              "matches": [
+                {
+                  "lineNumber": 41,
+                  "content": "                &lt;Link href=\"/health-history\" className=\"font-medium text-[var(--hmr-border-light)] transition hover:text-[var(--hmr-bamboo)]\"&gt;"
+                }
+              ]
+            },
+            {
+              "file": "./components/nav-bar.tsx",
+              "matches": [
+                {
+                  "lineNumber": 11,
+                  "content": "  { href: \"/health-history\", label: \"Health History\" },"
+                }
+              ]
+            },
+            {
+              "file": "./app/health-history/page.tsx",
+              "matches": [
+                {
+                  "lineNumber": 6,
+                  "content": "const STORAGE_KEY_HEALTH_DONE = \"hmr_health_history_completed\";"
+                },
+                {
+                  "lineNumber": 284,
+                  "content": "export default function HealthHistoryPage() {"
+                },
+                {
+                  "lineNumber": 302,
+                  "content": "      localStorage.setItem(\"hmr_health_history_data\", JSON.stringify(form));"
+                },
+                {
+                  "lineNumber": 363,
+                  "content": "        New member health history"
+                },
+                {
+                  "lineNumber": 410,
+                  "content": "            label=\"What aspect of your health would you like to concentrate on?\""
+                },
+                {
+                  "lineNumber": 850,
+                  "content": "          Submit health history"
+                }
+              ]
+            }
+          ],
+          "totalLines": 8,
+          "totalMatchedLines": 8
+        }
+      }
+    }
+  }
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="unknown" data-tool-name="list_dir_v2">
+<details>
+<summary>Tool use: **list_dir_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "targetDirectory": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api"
+}
+```
+Result:
+
+```json
+{
+  "directoryTreeRoot": {
+    "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api",
+    "childrenDirs": [
+      {
+        "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/auth",
+        "childrenDirs": [
+          {
+            "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/auth/[...nextauth]",
+            "childrenFiles": [
+              {
+                "name": "route.ts"
+              }
+            ],
+            "childrenWereProcessed": true
+          }
+        ],
+        "childrenWereProcessed": true
+      },
+      {
+        "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/bookings",
+        "childrenDirs": [
+          {
+            "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/bookings/[id]",
+            "childrenFiles": [
+              {
+                "name": "route.ts"
+              }
+            ],
+            "childrenWereProcessed": true
+          }
+        ],
+        "childrenFiles": [
+          {
+            "name": "route.ts"
+          }
+        ],
+        "childrenWereProcessed": true
+      },
+      {
+        "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/credits",
+        "childrenFiles": [
+          {
+            "name": "route.ts"
+          }
+        ],
+        "childrenWereProcessed": true
+      },
+      {
+        "absPath": "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/app/api/events",
+        "childrenFiles": [
+          {
+            "name": "route.ts"
+          }
+        ],
+        "childrenWereProcessed": true
+      }
+    ],
+    "childrenWereProcessed": true
+  }
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+
+Confirmed: health history is only in localStorage. There's no API or DB model for it. I need to:
+
+1. Add a HealthHistory model in Prisma (linked to User) - store the form as JSON since the form has many fields.
+2. Create API: POST /api/health-history (submit), GET /api/health-history (list for admin).
+3. Update health-history page to POST on submit (and require auth so we know which user submitted).
+4. Add admin page /admin/health-history to list and view submissions.
+
+I will also check auth - how do we know who's submitting? The health-history page doesn't seem to require login. So we have two options:
+- Require login to submit health history, then we can associate with User.
+- Allow anonymous submit but then we need some way to identify (e.g. email field). 
+
+Looking at the form again - there's no email/name on the health history form. So currently it's anonymous + localStorage. To make it viewable by admin we need either:
+A) Require user to be logged in when submitting health history, then save to DB linked to User.
+B) Add email/name to the form and save to DB (user might not have an account).
+
+Option A is cleaner if the app flow is: user signs up → logs in → fills health history. I will check if there's a member flow that goes to health history.
+
+Actually re-reading the user question: "as admin, how do i view the health history forms once submitted?" - they want to view them. So we need to persist them server-side. The minimal change is:
+1. Add HealthHistory model (userId optional if we allow anonymous, or required if we require login).
+2. For now I'll require the user to be logged in to submit (so we have User id). If the health history page is used before login we could add a note "sign in to submit" or allow anonymous with an optional email field. I will check middleware and auth.
+</details></think>
+
+---
+
+
+Checking auth and whether the health-history page requires login:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/middleware.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/lib/auth.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+
+Health history page is public (not under /admin, /member, /dashboard). So users can submit without logging in. To keep that flow but still let admin view, we have two options:
+
+1. **Require login to submit** – then we have userId. Simpler.
+2. **Allow anonymous submit** – we'd need to store without userId, or add an optional "email" field to the form so admin can identify. More complex.
+
+I'll go with (1): require login to submit health history. So we'll:
+- Add HealthHistory model with userId (required), and a JSON field for the form data.
+- POST /api/health-history – requires auth, body = form JSON, creates HealthHistory for current user (or updates if we do one per user).
+- GET /api/health-history – for admin: list all; for member: get own. So we need to check role and return all if admin, else own.
+- Update health-history page: if not logged in, show "Please sign in to submit" or redirect to login. On submit, POST to API and clear localStorage.
+- Add /admin/health-history page (or section in admin) to list submissions and view detail.
+
+Actually re-reading again: the current form doesn't require login. So maybe the site allows anonymous visitors to fill the form (e.g. before they have an account). In that case we need to store without User or with optional User. I will add:
+- HealthHistory: id, userId (optional), formData (JSON), createdAt. If we have optional userId, then when a user is logged in we set it; otherwise we don't. But then "view by admin" would show a mix of anonymous and named. Alternatively we could require login only for "submitting to server" and allow localStorage-only for anonymous (current behavior), and when they later log in we don't have their form. That's messy.
+
+Simplest is: **Require login to submit**. So the flow is: Sign up → Log in → Fill health history → Submit (saved to DB). Admin can then view all. I'll implement that. We can add a note on the health history page: "You need to be signed in to submit your health history."
+
+Implementing:
+
+1. **Prisma**: Add model HealthHistory { id, userId (String, relation to User), formData (String - JSON), createdAt }. One-to-many User -> HealthHistory. Actually do we allow multiple submissions? The form says "complete once". So one per user - we could use @@unique([userId]) or just allow multiple and show latest. I'll allow multiple (e.g. if they update) and in admin show all, or we could update the same record. I will do one record per user, update on submit (upsert by userId).
+
+2. **API POST /api/health-history**: auth required, body = form state JSON. Create or update HealthHistory for this user.
+
+3. **API GET /api/health-history**: auth required. If admin: return all HealthHistory with user name/email. If member: return own only.
+
+4. **Health history page**: Check session. If not logged in, show "Please sign in to submit" with link to login. On submit, POST to API then show success. Optionally still use localStorage for "already completed" for anonymous visitors (or we could remove that and just require login).
+
+5. **Admin**: New page /admin/health-history that fetches GET /api/health-history and displays a list of submissions (user name, email, date) and a detail view (expand or separate page) to see the full form.
+
+I will also add a link from the admin dashboard to "Health history forms" so the admin can find it easily.
+</details></think>
+
+---
+
+
+Health history is only saved in the browser (localStorage), so admins can’t see it. Adding server-side storage and an admin view: persist health history in the DB, add APIs to submit and list (admin sees all), and an admin page to view submissions.
+
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [-] Add HealthHistory model to Prisma and run migration
+- [ ] Create API POST/GET /api/health-history
+- [ ] Update health-history page to submit to API when logged in
+- [ ] Add admin health history list + detail view and dashboard link
+
+</details>
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+
+I need to add the HealthHistory model. I'll store the form as JSON (String in SQLite). One record per user - we can upsert on submit (update if exists for this user, else create). Actually the form says "complete once" - so one submission per user. I'll use a unique constraint on userId so we only have one HealthHistory per user, and on submit we update that record.
+</details></think>
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer/prisma/schema.prisma</summary>
+
+</details>
+
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+
+Now run the migration.
+</details></think>
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer" && npx prisma migrate dev --name add_health_history</summary>
+
+```bash
+cd "/Users/sarahrussell/Desktop/Hold My Reformer/hold_my_reformer" && npx prisma migrate dev --name add_health_history
+```
+
+```
+Datasource "db": SQLite database "dev.db" at "file:./prisma/dev.db"
+
+Applying migration &#96;20260129224634_add_health_history&#96;
+
+The following migration(s) have been created and applied from new schema changes:
+
+prisma/migrations/
+  └─ 20260129224634_add_health_history/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+
+```
+</details>
+</tool-use>
+
+---
+

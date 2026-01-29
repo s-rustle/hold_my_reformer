@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const STORAGE_KEY_HEALTH_DONE = "hmr_health_history_completed";
 
@@ -282,27 +283,62 @@ function CheckboxGroup({
 }
 
 export default function HealthHistoryPage() {
+  const { data: session, status } = useSession();
   const [completed, setCompleted] = useState<boolean | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setCompleted(localStorage.getItem(STORAGE_KEY_HEALTH_DONE) === "true");
   }, []);
 
+  useEffect(() => {
+    if (status !== "authenticated" || completed !== false) return;
+    fetch("/api/health-history")
+      .then((r) => r.ok ? r.json() : [])
+      .then((list) => {
+        if (Array.isArray(list) && list.length > 0) {
+          setCompleted(true);
+        }
+      })
+      .catch(() => {});
+  }, [status, completed]);
+
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY_HEALTH_DONE, "true");
-      localStorage.setItem("hmr_health_history_data", JSON.stringify(form));
+    setSubmitError("");
+    if (status !== "authenticated" || !session?.user) {
+      setSubmitError("Please sign in to submit your health history.");
+      return;
     }
-    setCompleted(true);
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/health-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || "Failed to submit. Please try again.");
+        return;
+      }
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY_HEALTH_DONE, "true");
+        localStorage.setItem("hmr_health_history_data", JSON.stringify(form));
+      }
+      setCompleted(true);
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const showPregnancySections = form.pregnantOrPostnatal === "yes";
@@ -365,6 +401,16 @@ export default function HealthHistoryPage() {
       <p className="mt-2 text-[var(--hmr-bg-text)]/90">
         Please complete this form once before your first session.
       </p>
+      {status === "authenticated" ? null : (
+        <div className="mt-4 hmr-card p-4 bg-[var(--hmr-light)]/80 border border-[var(--hmr-primary)]/30">
+          <p className="text-sm text-[var(--hmr-deep)]">
+            You need to be signed in to submit your health history.{" "}
+            <Link href={`/login?callbackUrl=${encodeURIComponent("/health-history")}`} className="font-medium text-[var(--hmr-primary)] underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
         {/* Intro */}
@@ -843,11 +889,15 @@ export default function HealthHistoryPage() {
         )}
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        {submitError && (
+          <p className="text-sm text-red-600 dark:text-red-400 w-full sm:w-auto">{submitError}</p>
+        )}
         <button
           type="submit"
-          className="hmr-btn-primary w-full py-3 sm:w-auto sm:px-8"
+          disabled={submitting || status !== "authenticated"}
+          className="hmr-btn-primary w-full py-3 sm:w-auto sm:px-8 disabled:opacity-50"
         >
-          Submit health history
+          {submitting ? "Submitting…" : "Submit health history"}
         </button>
           <Link
             href="/"

@@ -137,6 +137,12 @@ export function AdminDashboard() {
         </div>
         <div className="flex items-center gap-4">
           <Link
+            href="/admin/health-history"
+            className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm"
+          >
+            Health history forms
+          </Link>
+          <Link
             href="/"
             className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm"
           >
